@@ -11,6 +11,8 @@ const swaggerJsdoc2 = require('swagger-jsdoc');
 const swaggerUI2 = require('swagger-ui-express');
 const cors = require('cors');
 
+const { body , validationResult } = require('express-validator');
+
 const options = {
     swaggerDefinition :{
         info:{
@@ -252,25 +254,44 @@ app.get('/api/v1/company/:CID', (req, res) => {
  *       200:
  *         description: Company record Successfully updated
  */
-app.patch('/api/v1/company', (req, res) => {
 
-        console.log("inside the company PATCH Route");
+app.patch('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(), body('NAME').isLength({min:1,max:25}).trim().escape(), body('CITY').isLength({min:1,max:25}).trim().escape()], (req, res) => {
+	
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+ 		   return res.status(400).json({ errors: errors.array() });
+  	}
+
+	console.log("inside the company PATCH Route");
         console.log(req.body);
         res.setHeader('Content-Type','application/text');
         pool.getConnection()
                 .then(conn =>{
-                return conn.query("UPDATE company SET COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID = ?", [req.body.NAME,req.body.CITY,req.body.ID])
+ 		return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;",[req.body.ID])
                         .then(row => {
+                        //conn.end();
+                        //console.log(row);
+                        console.log(row[0]);
+                        //console.log(row[1]);
+                        if(row[0].xyz == 1){
+                        //res.end("Company ID already exists");
+                        console.log("Company ID already exists");
+                        conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?",[req.body.NAME,req.body.CITY,req.body.ID]);
                         conn.end();
-                        res.end("Company Record Updated sucessfully");
-                        console.log("connected to sample DB. inside company ID  PATCH");
+                        res.end("UPDATED the existing company");
+                        }
+                        else{
+                        conn.end();
+                        console.log("COMPANY ID NOT PRESENT");
+                        res.status(400).end("COMPANY ID NOT PRESENT IN DATABASE");
+                        }
                         })
                         .finally(() => {
                         conn.end();
                         });
                 })
-                .catch(err=>{
-                res.end(err);
+	        .catch(err=>{
+                throw(err);
                 });
 
 })
@@ -296,23 +317,38 @@ app.patch('/api/v1/company', (req, res) => {
  *       200:
  *         description: Company record Successfully created
  */
-app.post('/api/v1/company', (req, res) => {
-        
+app.post('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),body('NAME').isLength({min:1,max:25}).trim().escape(),body('CITY').isLength({min:1,max:25}).trim().escape()],(req,res) => {
+        const errors = validationResult(req);
+  	if (!errors.isEmpty()) {
+    		return res.status(400).json({ errors: errors.array() });
+	}
+
         console.log("inside the company POST Route");
 	console.log(req.body);
    	res.setHeader('Content-Type','application/text');
 	pool.getConnection()
                 .then(conn =>{
-                return conn.query("INSERT INTO company (COMPANY_ID,COMPANY_NAME,COMPANY_CITY) VALUES (?,?,?)", [req.body.ID,req.body.NAME,req.body.CITY])
+                	return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;",[req.body.ID])
                         .then(row => {
+                        //conn.end();
+                        //console.log(row);
+                        console.log(row[0]);
+                        //console.log(row[1]);
+                        if(row[0].xyz == 1){
+                        res.end("Company ID already exists");
                         conn.end();
-                        console.log(row);
-			res.end("Company Record inserted sucessfully");
-			console.log("connected to sample DB. inside company ID  POST");
+                        }
+                        else{
+                        conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)",[req.body.ID, req.body.NAME, req.body.CITY]);
+                        conn.end();
+                        console.log("INSERT CAN HAPPEN");
+                        res.end("INSERTED");
+                        }
                         })
                         .finally(() => {
                         conn.end();
                         });
+
                 })
                 .catch(err=>{
                 throw(err);
@@ -340,7 +376,11 @@ app.post('/api/v1/company', (req, res) => {
  *       200:
  *         description: Company record Successfully created
  */
-app.put('/api/v1/company', (req, res) => {
+app.put('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),body('NAME').isLength({min:1,max:25}).trim().escape(),body('CITY').isLength({min:1,max:25}).trim().escape()],(req,res) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+   		 return res.status(400).json({ errors: errors.array() });
+	}
 
         console.log("inside the company POST Route");
         console.log(req.body);
@@ -349,15 +389,20 @@ app.put('/api/v1/company', (req, res) => {
                 .then(conn =>{
                 return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;",[req.body.ID])
                         .then(row => {
-                        conn.end();
+                        //conn.end();
                         //console.log(row);
 			console.log(row[0]);
 			//console.log(row[1]);
 			if(row[0].xyz == 1){
-                        res.end("Company ID already exists");
+                        //res.end("Company ID already exists");
                         console.log("Company ID already exists");
-                        }
+                        conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?",[req.body.NAME,req.body.CITY,req.body.ID]);
+			conn.end();
+			res.end("UPDATED the existing company");
+			}
 			else{
+			conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)",[req.body.ID, req.body.NAME, req.body.CITY]);
+			conn.end();
 			console.log("INSERT CAN HAPPEN");
 			res.end("INSERTED");
 			}
@@ -395,8 +440,20 @@ app.put('/api/v1/company', (req, res) => {
  *           $ref: '#/definitions/Company'
  */
 app.delete('/api/v1/company/:CID', (req, res) => {
-        //res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type','application/json');
         console.log("inside the company ID DELETE Route");
+	const CID = req.params.CID;
+    	console.log(CID);
+    	console.log(CID.toString().length);
+    	if(!CID)
+    	{
+        return res.status(400).end("COMPANY ID id needed");
+    	}
+    	else if(CID.toString().length> 6)
+    	{
+	console.log(" long ID");
+    	return res.status(400).end("COMPANY ID is invalid. Max length 6 characters");
+    	}
         pool.getConnection()
                 .then(conn =>{
                 return conn.query("DELETE FROM company where COMPANY_ID= ?", [req.params.CID])
