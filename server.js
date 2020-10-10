@@ -221,9 +221,15 @@ app.get('/api/v1/company/:CID', (req, res) => {
                 .then(conn =>{
                 return conn.query("SELECT COMPANY_ID as CompanyID,COMPANY_NAME as Name,COMPANY_CITY as City FROM company where COMPANY_ID= ?", [req.params.CID])
                         .then(row => {
+                                console.log(row[0]);
                         conn.end();
+                        if(row[0]){
                         res.json(row);
                         console.log("connected to sample DB. inside company ID  GET");
+                        }
+                        else {
+                                res.end("COMPANY ID not present in the DB")
+                        }
                         })
                         .finally(() => {
                         conn.end();
@@ -278,7 +284,7 @@ app.patch('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape()
                         console.log("Company ID already exists");
                         conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?",[req.body.NAME,req.body.CITY,req.body.ID]);
                         conn.end();
-                        res.end("UPDATED the existing company");
+                        res.end("UPDATED the existing company record");
                         }
                         else{
                         conn.end();
@@ -342,7 +348,7 @@ app.post('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),
                         conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)",[req.body.ID, req.body.NAME, req.body.CITY]);
                         conn.end();
                         console.log("INSERT CAN HAPPEN");
-                        res.end("INSERTED");
+                        res.end("New Company record Inserted into the database");
                         }
                         })
                         .finally(() => {
@@ -404,7 +410,7 @@ app.put('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),b
 			conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)",[req.body.ID, req.body.NAME, req.body.CITY]);
 			conn.end();
 			console.log("INSERT CAN HAPPEN");
-			res.end("INSERTED");
+			res.end("Inserted the company record into the database");
 			}
 			})
                         .finally(() => {
