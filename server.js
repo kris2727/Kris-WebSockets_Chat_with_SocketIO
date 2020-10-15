@@ -6,35 +6,35 @@ var https = require('https')
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+const axios = require('axios').default;
 const swaggerJsdoc2 = require('swagger-jsdoc');
 const swaggerUI2 = require('swagger-ui-express');
 const cors = require('cors');
 
-const { body , validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 const options = {
-    swaggerDefinition :{
-        info:{
-            title: 'Assignment 8 sample DB API',
-            version: '1.0.0',
-            description: 'Company, customer, agent details Database'
+        swaggerDefinition: {
+                info: {
+                        title: 'Assignment 8 sample DB API',
+                        version: '1.0.0',
+                        description: 'Company, customer, agent details Database'
+                },
+                host: '206.189.199.15:3001',
+                basePath: '/',
         },
-        host:'206.189.199.15:3001',
-        basePath: '/',
-    },
-    apis: ['./server.js'],
+        apis: ['./server.js'],
 };
 
 const mariadb = require('mariadb');
 const pool = mariadb.createPool({
 
-	host:'localhost',
-	user:'root',
-	password:'root',
-	database:'sample',
-	port:3306,
-	connectionLimit:5
+        host: 'localhost',
+        user: 'root',
+        password: 'root',
+        database: 'sample',
+        port: 3306,
+        connectionLimit: 5
 });
 
 /**
@@ -63,45 +63,45 @@ const pool = mariadb.createPool({
  *          
  */
 app.get('/api/v1/customer', (req, res) => {
-	res.setHeader('Content-Type','application/json');
-	console.log("inside the customer GET Route");
-	pool.getConnection()
-		.then(conn =>{
-		return conn.query("SELECT * FROM customer;")
-			.then(row => {
-		  	conn.end();
-		  	res.json(row);
+        res.setHeader('Content-Type', 'application/json');
+        console.log("inside the customer GET Route");
+        pool.getConnection()
+                .then(conn => {
+                        return conn.query("SELECT * FROM customer;")
+                                .then(row => {
+                                        conn.end();
+                                        res.json(row);
 
-			console.log("connected to sample DB. inside customer GET");
-			})
-			.finally(() => {
-			conn.end();
-			});
-		})
-		.catch(err=>{
-		throw err;
-		});
-	});
+                                        console.log("connected to sample DB. inside customer GET");
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
+                })
+                .catch(err => {
+                        throw err;
+                });
+});
 
 app.get('/api/v1/customer/:custID', (req, res) => {
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         console.log("inside the customer ID GET Route");
         pool.getConnection()
-                .then(conn =>{
-                return conn.query("SELECT CUST_CODE as Id,CUST_NAME as Name,CUST_CITY as City FROM customer where CUST_CODE= ?", [req.params.custID])
-                        .then(row => {
-                        conn.end();
-                        res.json(row);
-                        console.log("connected to sample DB. inside customer ID  GET");
-                        })
-                        .finally(() => {
-                        conn.end();
-                        });
+                .then(conn => {
+                        return conn.query("SELECT CUST_CODE as Id,CUST_NAME as Name,CUST_CITY as City FROM customer where CUST_CODE= ?", [req.params.custID])
+                                .then(row => {
+                                        conn.end();
+                                        res.json(row);
+                                        console.log("connected to sample DB. inside customer ID  GET");
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-                .catch(err=>{
-                throw err;
+                .catch(err => {
+                        throw err;
                 });
-        });
+});
 
 
 /**
@@ -116,46 +116,46 @@ app.get('/api/v1/customer/:custID', (req, res) => {
  *               description: Return all agents details
  *          
  */
-app.get('/api/v1/agents', (req, res) => {         
-	res.setHeader('Content-Type','application/json');         
-	console.log("inside the agents GET Route");
-	pool.getConnection() 
-	        .then(conn =>{ 
-                return conn.query("SELECT * FROM agents;")                         
-			.then(row => {
-			conn.end();  
-                        res.json(row);    
-	                console.log("connected to sample DB. inside agents GET"); 
-                        }) 
-                        .finally(() => {
-			conn.end();
-                         });
-                 })
-               
-		 .catch(err=>{
-		 throw err;
-                 });         
-	});
+app.get('/api/v1/agents', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        console.log("inside the agents GET Route");
+        pool.getConnection()
+                .then(conn => {
+                        return conn.query("SELECT * FROM agents;")
+                                .then(row => {
+                                        conn.end();
+                                        res.json(row);
+                                        console.log("connected to sample DB. inside agents GET");
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
+                })
+
+                .catch(err => {
+                        throw err;
+                });
+});
 
 app.get('/api/v1/agents/:agentCode', (req, res) => {
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         console.log("inside the agents ID GET Route");
         pool.getConnection()
-                .then(conn =>{
-                return conn.query("SELECT AGENT_CODE as AgentCode,AGENT_NAME as Name,WORKING_AREA as City,PHONE_NO as Phone FROM agents where TRIM(AGENT_CODE)= ?", [req.params.agentCode])
-                        .then(row => {
-                        conn.end();
-                        res.json(row);
-                        console.log("connected to sample DB. inside agents ID  GET");
-                        })
-                        .finally(() => {
-                        conn.end();
-                        });
+                .then(conn => {
+                        return conn.query("SELECT AGENT_CODE as AgentCode,AGENT_NAME as Name,WORKING_AREA as City,PHONE_NO as Phone FROM agents where TRIM(AGENT_CODE)= ?", [req.params.agentCode])
+                                .then(row => {
+                                        conn.end();
+                                        res.json(row);
+                                        console.log("connected to sample DB. inside agents ID  GET");
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-                .catch(err=>{
-                throw err;
+                .catch(err => {
+                        throw err;
                 });
-        });
+});
 
 /**
  * @swagger
@@ -173,25 +173,25 @@ app.get('/api/v1/agents/:agentCode', (req, res) => {
  *           $ref: '#/definitions/Company'
  */
 app.get('/api/v1/company', (req, res) => {
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         console.log("inside the company GET Route");
-	console.log(req.body.data);
+        console.log(req.body.data);
         pool.getConnection()
-                .then(conn =>{
-                return conn.query("SELECT * FROM company;")
-                        .then(row => {
-                        conn.end();
-                        res.json(row);    
-                        console.log("connected to sample DB. inside company GET");
-                        })
-                        .finally(() => {
-                        conn.end();
-                        });
+                .then(conn => {
+                        return conn.query("SELECT * FROM company;")
+                                .then(row => {
+                                        conn.end();
+                                        res.json(row);
+                                        console.log("connected to sample DB. inside company GET");
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-                .catch(err=>{
-                throw err;
+                .catch(err => {
+                        throw err;
                 });
-        });
+});
 
 /**
  * @swagger
@@ -215,30 +215,30 @@ app.get('/api/v1/company', (req, res) => {
  *           $ref: '#/definitions/Company'
  */
 app.get('/api/v1/company/:CID', (req, res) => {
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         console.log("inside the company ID GET Route");
         pool.getConnection()
-                .then(conn =>{
-                return conn.query("SELECT COMPANY_ID as CompanyID,COMPANY_NAME as Name,COMPANY_CITY as City FROM company where COMPANY_ID= ?", [req.params.CID])
-                        .then(row => {
-                                console.log(row[0]);
-                        conn.end();
-                        if(row[0]){
-                        res.json(row);
-                        console.log("connected to sample DB. inside company ID  GET");
-                        }
-                        else {
-                                res.end("COMPANY ID not present in the DB")
-                        }
-                        })
-                        .finally(() => {
-                        conn.end();
-                        });
+                .then(conn => {
+                        return conn.query("SELECT COMPANY_ID as CompanyID,COMPANY_NAME as Name,COMPANY_CITY as City FROM company where COMPANY_ID= ?", [req.params.CID])
+                                .then(row => {
+                                        console.log(row[0]);
+                                        conn.end();
+                                        if (row[0]) {
+                                                res.json(row);
+                                                console.log("connected to sample DB. inside company ID  GET");
+                                        }
+                                        else {
+                                                res.end("COMPANY ID not present in the DB")
+                                        }
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-                .catch(err=>{
-                throw err;
+                .catch(err => {
+                        throw err;
                 });
-        });
+});
 
 /**
  * @swagger
@@ -261,43 +261,43 @@ app.get('/api/v1/company/:CID', (req, res) => {
  *         description: Company record Successfully updated
  */
 
-app.patch('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(), body('NAME').isLength({min:1,max:25}).trim().escape(), body('CITY').isLength({min:1,max:25}).trim().escape()], (req, res) => {
-	
-	const errors = validationResult(req);
-	if (!errors.isEmpty()) {
- 		   return res.status(400).json({ errors: errors.array() });
-  	}
+app.patch('/api/v1/company', [body('ID').isLength({ min: 1, max: 6 }).trim().escape(), body('NAME').isLength({ min: 1, max: 25 }).trim().escape(), body('CITY').isLength({ min: 1, max: 25 }).trim().escape()], (req, res) => {
 
-	console.log("inside the company PATCH Route");
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+        }
+
+        console.log("inside the company PATCH Route");
         console.log(req.body);
-        res.setHeader('Content-Type','application/text');
+        res.setHeader('Content-Type', 'application/text');
         pool.getConnection()
-                .then(conn =>{
- 		return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;",[req.body.ID])
-                        .then(row => {
-                        //conn.end();
-                        //console.log(row);
-                        console.log(row[0]);
-                        //console.log(row[1]);
-                        if(row[0].xyz == 1){
-                        //res.end("Company ID already exists");
-                        console.log("Company ID already exists");
-                        conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?",[req.body.NAME,req.body.CITY,req.body.ID]);
-                        conn.end();
-                        res.end("UPDATED the existing company record");
-                        }
-                        else{
-                        conn.end();
-                        console.log("COMPANY ID NOT PRESENT");
-                        res.status(400).end("COMPANY ID NOT PRESENT IN DATABASE");
-                        }
-                        })
-                        .finally(() => {
-                        conn.end();
-                        });
+                .then(conn => {
+                        return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;", [req.body.ID])
+                                .then(row => {
+                                        //conn.end();
+                                        //console.log(row);
+                                        console.log(row[0]);
+                                        //console.log(row[1]);
+                                        if (row[0].xyz == 1) {
+                                                //res.end("Company ID already exists");
+                                                console.log("Company ID already exists");
+                                                conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?", [req.body.NAME, req.body.CITY, req.body.ID]);
+                                                conn.end();
+                                                res.end("UPDATED the existing company record");
+                                        }
+                                        else {
+                                                conn.end();
+                                                console.log("COMPANY ID NOT PRESENT");
+                                                res.status(400).end("COMPANY ID NOT PRESENT IN DATABASE");
+                                        }
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-	        .catch(err=>{
-                throw(err);
+                .catch(err => {
+                        throw (err);
                 });
 
 })
@@ -323,41 +323,41 @@ app.patch('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape()
  *       200:
  *         description: Company record Successfully created
  */
-app.post('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),body('NAME').isLength({min:1,max:25}).trim().escape(),body('CITY').isLength({min:1,max:25}).trim().escape()],(req,res) => {
+app.post('/api/v1/company', [body('ID').isLength({ min: 1, max: 6 }).trim().escape(), body('NAME').isLength({ min: 1, max: 25 }).trim().escape(), body('CITY').isLength({ min: 1, max: 25 }).trim().escape()], (req, res) => {
         const errors = validationResult(req);
-  	if (!errors.isEmpty()) {
-    		return res.status(400).json({ errors: errors.array() });
-	}
+        if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+        }
 
         console.log("inside the company POST Route");
-	console.log(req.body);
-   	res.setHeader('Content-Type','application/text');
-	pool.getConnection()
-                .then(conn =>{
-                	return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;",[req.body.ID])
-                        .then(row => {
-                        //conn.end();
-                        //console.log(row);
-                        console.log(row[0]);
-                        //console.log(row[1]);
-                        if(row[0].xyz == 1){
-                        res.end("Company ID already exists");
-                        conn.end();
-                        }
-                        else{
-                        conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)",[req.body.ID, req.body.NAME, req.body.CITY]);
-                        conn.end();
-                        console.log("INSERT CAN HAPPEN");
-                        res.end("New Company record Inserted into the database");
-                        }
-                        })
-                        .finally(() => {
-                        conn.end();
-                        });
+        console.log(req.body);
+        res.setHeader('Content-Type', 'application/text');
+        pool.getConnection()
+                .then(conn => {
+                        return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;", [req.body.ID])
+                                .then(row => {
+                                        //conn.end();
+                                        //console.log(row);
+                                        console.log(row[0]);
+                                        //console.log(row[1]);
+                                        if (row[0].xyz == 1) {
+                                                res.end("Company ID already exists");
+                                                conn.end();
+                                        }
+                                        else {
+                                                conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)", [req.body.ID, req.body.NAME, req.body.CITY]);
+                                                conn.end();
+                                                console.log("INSERT CAN HAPPEN");
+                                                res.end("New Company record Inserted into the database");
+                                        }
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
 
                 })
-                .catch(err=>{
-                throw(err);
+                .catch(err => {
+                        throw (err);
                 });
 
 })
@@ -382,43 +382,43 @@ app.post('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),
  *       200:
  *         description: Company record Successfully created
  */
-app.put('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),body('NAME').isLength({min:1,max:25}).trim().escape(),body('CITY').isLength({min:1,max:25}).trim().escape()],(req,res) => {
-	const errors = validationResult(req);
-	if (!errors.isEmpty()) {
-   		 return res.status(400).json({ errors: errors.array() });
-	}
+app.put('/api/v1/company', [body('ID').isLength({ min: 1, max: 6 }).trim().escape(), body('NAME').isLength({ min: 1, max: 25 }).trim().escape(), body('CITY').isLength({ min: 1, max: 25 }).trim().escape()], (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+        }
 
         console.log("inside the company POST Route");
         console.log(req.body);
-        res.setHeader('Content-Type','application/text');
+        res.setHeader('Content-Type', 'application/text');
         pool.getConnection()
-                .then(conn =>{
-                return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;",[req.body.ID])
-                        .then(row => {
-                        //conn.end();
-                        //console.log(row);
-			console.log(row[0]);
-			//console.log(row[1]);
-			if(row[0].xyz == 1){
-                        //res.end("Company ID already exists");
-                        console.log("Company ID already exists");
-                        conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?",[req.body.NAME,req.body.CITY,req.body.ID]);
-			conn.end();
-			res.end("UPDATED the existing company");
-			}
-			else{
-			conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)",[req.body.ID, req.body.NAME, req.body.CITY]);
-			conn.end();
-			console.log("INSERT CAN HAPPEN");
-			res.end("Inserted the company record into the database");
-			}
-			})
-                        .finally(() => {
-                        conn.end();
-                        });
+                .then(conn => {
+                        return conn.query("SELECT COUNT(*) as xyz from company WHERE COMPANY_ID=?;", [req.body.ID])
+                                .then(row => {
+                                        //conn.end();
+                                        //console.log(row);
+                                        console.log(row[0]);
+                                        //console.log(row[1]);
+                                        if (row[0].xyz == 1) {
+                                                //res.end("Company ID already exists");
+                                                console.log("Company ID already exists");
+                                                conn.query("UPDATE company set COMPANY_NAME=? , COMPANY_CITY=? WHERE COMPANY_ID=?", [req.body.NAME, req.body.CITY, req.body.ID]);
+                                                conn.end();
+                                                res.end("UPDATED the existing company");
+                                        }
+                                        else {
+                                                conn.query("INSERT INTO company (COMPANY_ID, COMPANY_NAME, COMPANY_CITY) VALUES (?, ?, ?)", [req.body.ID, req.body.NAME, req.body.CITY]);
+                                                conn.end();
+                                                console.log("INSERT CAN HAPPEN");
+                                                res.end("Inserted the company record into the database");
+                                        }
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-                .catch(err=>{
-                throw(err);
+                .catch(err => {
+                        throw (err);
                 });
 
 })
@@ -446,46 +446,43 @@ app.put('/api/v1/company',[ body('ID').isLength({min:1,max:6}).trim().escape(),b
  *           $ref: '#/definitions/Company'
  */
 app.delete('/api/v1/company/:CID', (req, res) => {
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         console.log("inside the company ID DELETE Route");
-	const CID = req.params.CID;
-    	console.log(CID);
-    	console.log(CID.toString().length);
-    	if(!CID)
-    	{
-        return res.status(400).end("COMPANY ID id needed");
-    	}
-    	else if(CID.toString().length> 6)
-    	{
-	console.log(" long ID");
-    	return res.status(400).end("COMPANY ID is invalid. Max length 6 characters");
-    	}
+        const CID = req.params.CID;
+        console.log(CID);
+        console.log(CID.toString().length);
+        if (!CID) {
+                return res.status(400).end("COMPANY ID id needed");
+        }
+        else if (CID.toString().length > 6) {
+                console.log(" long ID");
+                return res.status(400).end("COMPANY ID is invalid. Max length 6 characters");
+        }
         pool.getConnection()
-                .then(conn =>{
-                return conn.query("DELETE FROM company where COMPANY_ID= ?", [req.params.CID])
-                        .then(row => {
-                        conn.end();
-                        //res.json(row);
-                        console.log("connected to sample DB. inside company ID  DELETE");
-                        //res.end(row);
-			console.log(row);
-			if(row.affectedRows == 0)
-			{
-				res.end("COMPANY ID NOT PRESENT IN THE TABLE");
-			}
-			else {
-				res.end("COMPANY DELETED");
-			}
+                .then(conn => {
+                        return conn.query("DELETE FROM company where COMPANY_ID= ?", [req.params.CID])
+                                .then(row => {
+                                        conn.end();
+                                        //res.json(row);
+                                        console.log("connected to sample DB. inside company ID  DELETE");
+                                        //res.end(row);
+                                        console.log(row);
+                                        if (row.affectedRows == 0) {
+                                                res.end("COMPANY ID NOT PRESENT IN THE TABLE");
+                                        }
+                                        else {
+                                                res.end("COMPANY DELETED");
+                                        }
 
-			})
-                        .finally(() => {
-                        conn.end();
-                        });
+                                })
+                                .finally(() => {
+                                        conn.end();
+                                });
                 })
-                .catch(err=>{
-                res.end(err);
+                .catch(err => {
+                        res.end(err);
                 });
-        });
+});
 
 
 const specs2 = swaggerJsdoc2(options);
@@ -493,16 +490,29 @@ app.use('/api/docs', swaggerUI2.serve, swaggerUI2.setup(specs2));
 app.use(cors());
 
 https.createServer({
-  key: fs.readFileSync('ser1.key'),
-  cert: fs.readFileSync('ser1.cert')
+        key: fs.readFileSync('ser1.key'),
+        cert: fs.readFileSync('ser1.cert')
 }, app)
-.listen(3000, function () {
-  console.log('Server https listening on port 3000! ');
-});
+        .listen(3000, function () {
+                console.log('Server https listening on port 3000! ');
+        });
 
 app.listen(3001);
 
-app.get('/', function (req, res) {      
-	res.end("Hello there. Please try below methods.");
+app.get('/', function (req, res) {
+        res.end("Hello there. Please try below methods.");
 });
 
+app.get('/say', function (req, res) {
+
+       console.log(req.query.keyword);
+        axios.get('https://vv1utm770e.execute-api.us-east-2.amazonaws.com/test/name?text=' + req.query.keyword)
+                .then(response => {
+                       console.log(response.data);
+			res.json(response.data);
+                })
+                .catch(err => {
+                        throw err;
+                });
+
+});
